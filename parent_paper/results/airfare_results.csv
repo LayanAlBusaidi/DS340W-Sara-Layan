@@ -1,0 +1,2 @@
+Model,Window,MAE,MSE,Epochs
+Bidirectional LSTM,April-September,43.71418380737305,3578.12646484375,82
