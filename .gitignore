@@ -21,3 +21,6 @@ parent_paper/extracted_data_old/
 parent_paper/extracted_data - Copy/
 parent_paper/old_preprocessed_data/
 
+# Ignore raw Airbnb datasets
+data/accommodation/raw/
+data/accomodation/raw/
