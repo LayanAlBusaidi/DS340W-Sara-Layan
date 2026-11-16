@@ -1,0 +1,2 @@
+date,usd_per_eur,eur_per_usd,source
+2024-11-25,1.0495,0.9528346831824678,https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A?startPeriod=2024-11-25&endPeriod=2024-11-25&format=csvdata

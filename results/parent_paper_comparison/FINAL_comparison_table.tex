@@ -1,0 +1,32 @@
+\begin{table}[t]
+\centering
+\caption{Comparison of airfare prediction models reported in the parent study and our experiments.}
+\label{tab:final_parent_comparison}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrr}
+\toprule
+& \multicolumn{2}{c}{Parent Study (EUR)} & \multicolumn{2}{c}{Our Study (EUR)} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Model & MAE & RMSE & MAE & RMSE \\
+\midrule
+Linear Regression & 54.60 & 70.48 & -- & -- \\
+Decision Tree & 49.55 & 74.64 & 86.55 & 100.02 \\
+KNN & 62.60 & 80.55 & 75.04 & 88.44 \\
+Ridge & -- & -- & 28.10 & 39.41 \\
+XGBoost & -- & -- & 43.11 & 51.57 \\
+MLP & -- & -- & 33.23 & 44.88 \\
+RNN & 50.21 & 65.53 & 27.77 & 39.29 \\
+Bi-RNN & 49.64 & 65.13 & -- & -- \\
+GRU & 47.74 & 62.20 & 27.88 & 39.90 \\
+Bi-GRU & 45.55 & 59.94 & -- & -- \\
+LSTM & 44.69 & 59.27 & 27.86 & 39.69 \\
+Bi-LSTM & 44.50 & 59.14 & -- & -- \\
+\bottomrule
+\end{tabular}
+\vspace{1mm}
+\begin{minipage}{\columnwidth}
+\footnotesize
+\textit{Note:} All error values are in EUR. Parent results are averages reported in \cite{meepaganithage_airfare} and converted from USD using the ECB rate on 2024-11-25 (1 USD = 0.952835 EUR). Parent RMSE is computed as the square root of reported average MSE. Our results use 31,058 December 2026 validation records. The studies use different datasets and prediction targets; values are not directly comparable.
+\end{minipage}
+\end{table}

@@ -1,4 +1,6 @@
 
+import ssl
+import certifi
 from pathlib import Path
 from io import StringIO
 import urllib.request
@@ -34,7 +36,15 @@ req = urllib.request.Request(
     headers={"User-Agent": "Mozilla/5.0"}
 )
 
-with urllib.request.urlopen(req, timeout=30) as response:
+ssl_context = ssl.create_default_context(
+    cafile=certifi.where()
+)
+
+with urllib.request.urlopen(
+    req,
+    timeout=30,
+    context=ssl_context
+) as response:
     csv_data = response.read().decode("utf-8")
 
 rate_df = pd.read_csv(StringIO(csv_data))
