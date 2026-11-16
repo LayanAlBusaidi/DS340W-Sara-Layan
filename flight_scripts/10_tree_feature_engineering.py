@@ -215,6 +215,32 @@ for experiment in experiments:
         model.predict(X_val), 0, None
     )
 
+
+    # Save individual December predictions
+    # for the selected XGBoost model.
+    if name == "XGBoost Native Categorical":
+
+        prediction_df = pd.DataFrame({
+            "route": val["route"].to_numpy(),
+            "actual": y_val,
+            "predicted": val_pred
+        })
+
+        prediction_path = (
+            OUT / "xgboost_validation_predictions.csv"
+        )
+
+        prediction_df.to_csv(
+            prediction_path,
+            index=False
+        )
+
+        print(
+            "Saved XGBoost predictions to:",
+            prediction_path
+        )
+
+
     train_metrics = evaluate(
         y_train, train_pred
     )

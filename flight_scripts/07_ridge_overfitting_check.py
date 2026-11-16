@@ -228,6 +228,51 @@ plt.savefig(
 
 plt.close()
 
+
+# -----------------------------------
+# 9. Save selected Ridge predictions
+# -----------------------------------
+selected_alpha = 0.15
+
+selected_model = Ridge(
+    alpha=selected_alpha,
+    solver="lsqr",
+    tol=1e-6
+)
+
+selected_model.fit(X_train, y_train)
+
+selected_predictions = np.clip(
+    selected_model.predict(X_val),
+    0,
+    None
+)
+
+prediction_df = pd.DataFrame({
+    "route": val["route"].to_numpy(),
+    "actual": y_val,
+    "predicted": selected_predictions
+})
+
+prediction_df.to_csv(
+    OUT / "ridge_validation_predictions.csv",
+    index=False
+)
+
+print("\n===== SAVED RIDGE PREDICTIONS =====")
+print(
+    "Validation MAE:",
+    mean_absolute_error(
+        y_val,
+        selected_predictions
+    )
+)
+print(
+    "Predictions saved to:",
+    OUT / "ridge_validation_predictions.csv"
+)
+
+
 # -----------------------------------
 # 9. Print final summary
 # -----------------------------------
