@@ -1,0 +1,29 @@
+\begin{table}[t]
+\centering
+\caption{Comparison of airfare prediction models reported in the parent study and our experiments.}
+\label{tab:parent_comparison}
+\small
+\begin{tabular}{lcc}
+\toprule
+Model & Parent MAE & Our MAE (EUR) \\
+\midrule
+Linear Regression & 57.30 & -- \\
+Decision Tree & 52.00 & -- \\
+KNN & 65.70 & -- \\
+Ridge & -- & 28.10 \\
+XGBoost & -- & 43.11 \\
+MLP & -- & 33.23 \\
+RNN & 52.70 & 27.77 \\
+Bi-RNN & 52.10 & -- \\
+GRU & 50.10 & 27.88 \\
+Bi-GRU & 47.80 & -- \\
+LSTM & 46.90 & 27.86 \\
+Bi-LSTM & 46.70 & -- \\
+\bottomrule
+\end{tabular}
+\vspace{1mm}
+\begin{minipage}{\columnwidth}
+\footnotesize
+\textit{Note:} Parent MAE values are averages reported in \cite{meepaganithage_airfare} in unspecified price units. Our MAE values are in EUR and use 31,058 December validation records. The datasets and prediction targets differ, so the numerical errors are not directly comparable.
+\end{minipage}
+\end{table}
