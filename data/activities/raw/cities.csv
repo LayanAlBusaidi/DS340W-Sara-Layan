@@ -1,0 +1,26 @@
+city,country,relomap_score,rent_1br_center_eur,meal_eur,coffee_eur,transport_monthly_eur,safety_score
+Lisbon,Portugal,92,1345,14,2.32,40,67
+Bangkok,Thailand,91,573,3.5,2.5,30,62
+Barcelona,Spain,90,1437,15,2,45,48
+Dubai,UAE,90,1991,12,4.5,80,84
+Bali,Indonesia,89,914,3,1.8,25,49
+Valencia,Spain,89,522,14,1.8,40,80
+Malaga,Spain,88,1300,12,1.6,35,68
+Chiang Mai,Thailand,88,345,2.5,1.5,20,70
+Berlin,Germany,88,1314,12,3.5,86,55
+Amsterdam,Netherlands,87,1850,18,3.8,100,52
+Tenerife,Spain,87,1100,12,1.5,45,72
+Madrid,Spain,87,1200,14,1.8,55,52
+Medellin,Colombia,86,577,4,1.2,25,42
+Tokyo,Japan,86,1100,8,3.5,70,93
+Kuala Lumpur,Malaysia,86,550,3,2,25,65
+Porto,Portugal,86,1105,12,2.26,40,66
+Prague,Czech Republic,85,900,9,2.8,25,76
+Paris,France,84,1339,16,3.5,75,42
+Mexico City,Mexico,84,750,5,2.5,15,35
+Singapore,Singapore,83,2500,8,4,120,88
+Tbilisi,Georgia,82,450,5,2,15,65
+Budapest,Hungary,82,650,8,2.5,35,60
+Seoul,South Korea,81,800,7,4,50,80
+Sofia,Bulgaria,80,468,6,2,25,65
+Bucharest,Romania,79,550,7,2,15,55
