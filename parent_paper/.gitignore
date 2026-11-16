@@ -6,7 +6,3 @@
 venv
 .DS_Store
 DS_Store
-
-# Ignore raw Airbnb datasets
-data/accommodation/raw/
-data/accomodation/raw/
