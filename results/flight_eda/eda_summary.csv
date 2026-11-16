@@ -1,0 +1,2 @@
+total_records,unique_routes,origin_cities,destination_cities,earliest_month,latest_month,median_fare_eur,routes_3plus_months,routes_3plus_consecutive_months
+210528,86666,468,2479,2026-09,2027-02,163.5,35628,33891
