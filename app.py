@@ -2,7 +2,6 @@
 import streamlit as st
 import pandas as pd
 from datetime import date, timedelta
-from pathlib import Path
 
 # Page configuration
 st.set_page_config(
@@ -11,38 +10,50 @@ st.set_page_config(
     layout="wide"
 )
 
-# Load flight dataset
-BASE_DIR = Path(__file__).resolve().parent
+from prediction import (
+    predict_airfare,
+    get_eligible_routes,
+    predict_daily_expenses,
+    get_destination_countries
+)
+
+# ==========================================
+# 1. LOAD AVAILABLE ROUTES
+# ==========================================
 
 @st.cache_data
-def load_flight_data():
-    df = pd.read_csv(
-        BASE_DIR / "data" / "fares_by_month_cleaned.csv"
-    )
+def load_supported_routes():
 
-    df = df.dropna(
-        subset=["origin_city", "destination_city"]
-    )
+    flights = get_eligible_routes()
 
-    df["origin_city"] = df["origin_city"].str.strip()
-    df["destination_city"] = df["destination_city"].str.strip()
+    destinations = flights[
+        "destination_city"
+    ].unique()
 
-    df = df[
-        (df["origin_city"] != "") &
-        (df["destination_city"] != "") &
-        (df["origin_city"] != df["destination_city"])
+    supported_destinations = [
+        city for city in destinations
+        if get_destination_countries(city)
     ]
 
-    return df
+    flights = flights[
+        flights["destination_city"].isin(
+            supported_destinations
+        )
+    ]
 
-flights = load_flight_data()
+    return flights
 
-# Available departure cities
+
+flights = load_supported_routes()
+
 departure_cities = sorted(
     flights["origin_city"].unique().tolist()
 )
 
-# Website styling
+# ==========================================
+# 2. WEBSITE STYLING
+# ==========================================
+
 st.markdown("""
 <style>
     .block-container {
@@ -51,7 +62,9 @@ st.markdown("""
     }
 
     .hero {
-        background: linear-gradient(120deg, #103E46, #147D80);
+        background: linear-gradient(
+            120deg, #103E46, #147D80
+        );
         padding: 40px;
         border-radius: 18px;
         color: white;
@@ -74,32 +87,48 @@ st.markdown("""
         border-radius: 10px;
         min-height: 45px;
     }
+
+    div[data-testid="stMetric"] {
+        background-color: rgba(
+            20, 125, 128, 0.08
+        );
+        padding: 20px;
+        border-radius: 12px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Website header
+# ==========================================
+# 3. WEBSITE HEADER
+# ==========================================
+
 st.markdown("""
 <div class="hero">
     <p>SMARTER TRAVEL PLANNING</p>
     <h1>Your next adventure starts here.</h1>
-    <p>Predict future travel expenses and plan your
-    personalized travel budget before you book.</p>
+    <p>Predict future travel expenses and plan
+    your personalized travel budget before
+    you book.</p>
 </div>
 """, unsafe_allow_html=True)
 
 st.header("Plan your trip")
 
 st.write(
-    "Enter your travel details below to estimate "
-    "your future travel budget."
+    "Enter your travel details below to "
+    "estimate your future travel budget."
 )
 
-# Destination selection
+# ==========================================
+# 4. DESTINATION SELECTION
+# ==========================================
+
 st.subheader("📍 Destination")
 
 col1, col2 = st.columns(2)
 
 with col1:
+
     origin = st.selectbox(
         "Departure city",
         options=departure_cities,
@@ -107,18 +136,21 @@ with col1:
         placeholder="Select departure city"
     )
 
-# Filter destinations based on selected origin
 if origin is not None:
+
     arrival_cities = sorted(
         flights.loc[
             flights["origin_city"] == origin,
             "destination_city"
         ].unique().tolist()
     )
+
 else:
+
     arrival_cities = []
 
 with col2:
+
     destination = st.selectbox(
         "Arrival city",
         options=arrival_cities,
@@ -128,9 +160,48 @@ with col2:
         key=f"destination_{origin}"
     )
 
+# Destination country matching
+destination_country = None
+
+if destination is not None:
+
+    countries = get_destination_countries(
+        destination
+    )
+
+    if len(countries) == 1:
+
+        destination_country = countries[0]
+
+        st.caption(
+            f"Daily expense location: "
+            f"{destination}, "
+            f"{destination_country.title()}"
+        )
+
+    elif len(countries) > 1:
+
+        destination_country = st.selectbox(
+            "Destination country",
+            options=countries,
+            index=None,
+            format_func=lambda x: x.title(),
+            placeholder="Select destination country",
+            key=f"country_{destination}"
+        )
+
+        st.caption(
+            "Country selection determines local "
+            "expense prices. Airfare country "
+            "matching has not yet been verified."
+        )
+
 st.divider()
 
-# User input form
+# ==========================================
+# 5. USER INPUT FORM
+# ==========================================
+
 with st.form("travel_form"):
 
     st.subheader("📅 Travel dates")
@@ -138,6 +209,7 @@ with st.form("travel_form"):
     col3, col4 = st.columns(2)
 
     with col3:
+
         departure_date = st.date_input(
             "Departure date",
             value=date.today() + timedelta(days=30),
@@ -146,6 +218,7 @@ with st.form("travel_form"):
         )
 
     with col4:
+
         return_date = st.date_input(
             "Return date",
             value=date.today() + timedelta(days=37),
@@ -160,6 +233,7 @@ with st.form("travel_form"):
     col5, col6 = st.columns(2)
 
     with col5:
+
         travelers = st.number_input(
             "Number of travelers",
             min_value=1,
@@ -169,6 +243,7 @@ with st.form("travel_form"):
         )
 
     with col6:
+
         rooms = st.number_input(
             "Number of rooms",
             min_value=1,
@@ -188,36 +263,61 @@ with st.form("travel_form"):
         horizontal=True
     )
 
+    st.caption(
+        "Economical: affordable meals and public transport. "
+        "Standard: balanced dining and transportation. "
+        "Premium: more dining, taxis and entertainment."
+    )
+
     submitted = st.form_submit_button(
         "Predict my travel budget",
         use_container_width=True
     )
 
-# Process user inputs
+# ==========================================
+# 6. VALIDATE USER INPUT
+# ==========================================
+
 if submitted:
 
     if origin is None or destination is None:
-        st.error("Please select departure and arrival cities.")
+
+        st.error(
+            "Please select departure and arrival cities."
+        )
+
+    elif destination_country is None:
+
+        st.error(
+            "Please select the destination country."
+        )
 
     elif return_date <= departure_date:
-        st.error("Return date must be after departure date.")
+
+        st.error(
+            "Return date must be after departure date."
+        )
 
     elif rooms > travelers:
-        st.error("Number of rooms cannot exceed travelers.")
+
+        st.error(
+            "Number of rooms cannot exceed travelers."
+        )
 
     else:
 
         nights = (return_date - departure_date).days
+
         trip_days = nights + 1
 
         days_until_departure = (
             departure_date - date.today()
         ).days
 
-        # Store user inputs for model integration
         user_input = {
             "origin": origin,
             "destination": destination,
+            "destination_country": destination_country,
             "departure_date": departure_date,
             "return_date": return_date,
             "departure_month": departure_date.strftime("%Y-%m"),
@@ -232,50 +332,283 @@ if submitted:
 
         st.session_state["user_input"] = user_input
 
-        st.success("Your travel details have been collected!")
+        try:
 
-        st.subheader("Your trip overview")
+            # ==========================================
+            # 7. GENERATE ESTIMATES
+            # ==========================================
 
-        st.write(f"**{origin} → {destination}**")
+            with st.spinner(
+                "Predicting your travel expenses..."
+            ):
 
-        col7, col8, col9 = st.columns(3)
+                airfare = predict_airfare(user_input)
 
-        col7.metric(
-            "Trip duration",
-            f"{nights} nights"
-        )
+                daily = predict_daily_expenses(user_input)
 
-        col8.metric(
-            "Travelers",
-            travelers
-        )
+            subtotal = (
+                airfare["total"] + daily["total"]
+            )
 
-        col9.metric(
-            "Days until departure",
-            days_until_departure
-        )
+            # ==========================================
+            # 8. RESULTS OVERVIEW
+            # ==========================================
 
-        st.info(
-            "Travel details are ready. Cost predictions "
-            "will appear once the models are connected."
-        )
+            st.divider()
 
-# Footer
-st.divider()
+            st.header("Your travel budget estimate")
 
-col10, col11, col12 = st.columns(3)
+            st.subheader(
+                f"{origin} → {destination}, "
+                f"{destination_country.title()}"
+            )
 
-with col10:
-    st.markdown("### ✈️ Airfare")
-    st.caption("Future flight price prediction")
+            st.caption(
+                f"{departure_date.strftime('%d %b %Y')} "
+                f"– {return_date.strftime('%d %b %Y')}"
+            )
 
-with col11:
-    st.markdown("### 🏨 Accommodation")
-    st.caption("Hotel cost estimation")
+            col7, col8, col9, col10 = st.columns(4)
 
-with col12:
-    st.markdown("### 💳 Other expenses")
-    st.caption("Additional travel expense prediction")
+            col7.metric(
+                "Trip duration",
+                f"{nights} nights"
+            )
+
+            col8.metric(
+                "Travelers",
+                travelers
+            )
+
+            col9.metric(
+                "Days until departure",
+                days_until_departure
+            )
+
+            col10.metric(
+                "Spending style",
+                spending_style
+            )
+
+            st.divider()
+
+            st.metric(
+                "Estimated budget subtotal",
+                f"€{subtotal:,.2f}"
+            )
+
+            st.caption(
+                "Includes airfare and other expenses. "
+                "Accommodation is not included yet."
+            )
+
+            col11, col12, col13 = st.columns(3)
+
+            col11.metric(
+                "Airfare",
+                f"€{airfare['total']:,.2f}"
+            )
+
+            col12.metric(
+                "Accommodation",
+                "Pending"
+            )
+
+            col13.metric(
+                "Other expenses",
+                f"€{daily['total']:,.2f}"
+            )
+
+            # ==========================================
+            # 9. AIRFARE BREAKDOWN
+            # ==========================================
+
+            st.divider()
+
+            st.subheader("✈️ Estimated airfare")
+
+            col14, col15, col16 = st.columns(3)
+
+            col14.metric(
+                "Outbound / person",
+                f"€{airfare['outbound']:,.2f}"
+            )
+
+            col15.metric(
+                "Return / person",
+                f"€{airfare['return']:,.2f}"
+            )
+
+            col16.metric(
+                "Round trip / person",
+                f"€{airfare['per_person']:,.2f}"
+            )
+
+            st.caption(
+                "Predicted using our trained "
+                "Recurrent Neural Network (RNN)."
+            )
+
+            # ==========================================
+            # 10. OTHER EXPENSES BREAKDOWN
+            # ==========================================
+
+            st.divider()
+
+            st.subheader("💳 Estimated other expenses")
+
+            col17, col18, col19 = st.columns(3)
+
+            col17.metric(
+                "Total other expenses",
+                f"€{daily['total']:,.2f}"
+            )
+
+            col18.metric(
+                "Daily cost / person",
+                f"€{daily['daily_per_person']:,.2f}"
+            )
+
+            col19.metric(
+                "Trip cost / person",
+                f"€{daily['total_per_person']:,.2f}"
+            )
+
+            st.markdown("#### Detailed expense breakdown")
+
+            expenses = [
+                ("🍽️ Food and dining", daily["food"]),
+                ("☕ Drinks and refreshments", daily["drinks"]),
+                ("🚌 Public transportation", daily["transport"]),
+                ("🚕 Taxi expenses", daily["taxi"]),
+                ("🎟️ Entertainment", daily["entertainment"])
+            ]
+
+            expense_table = []
+
+            for category, amount in expenses:
+
+                expense_table.append({
+                    "Expense category": category,
+                    "Daily per person (€)": round(
+                        amount / (trip_days * travelers), 2
+                    ),
+                    "Total trip cost (€)": round(amount, 2)
+                })
+
+            expense_df = pd.DataFrame(expense_table)
+
+            st.dataframe(
+                expense_df,
+                hide_index=True,
+                use_container_width=True,
+                column_config={
+                    "Daily per person (€)":
+                        st.column_config.NumberColumn(
+                            format="€%.2f"
+                        ),
+                    "Total trip cost (€)":
+                        st.column_config.NumberColumn(
+                            format="€%.2f"
+                        )
+                }
+            )
+
+            st.caption(
+                "Estimated using destination-specific "
+                "prices and spending profiles."
+            )
+
+            # ==========================================
+            # 11. EXPENSE VISUALIZATION
+            # ==========================================
+
+            st.divider()
+
+            st.subheader("📊 Travel expense distribution")
+
+            chart_data = pd.DataFrame({
+                "Category": [
+                    "Airfare",
+                    "Food",
+                    "Drinks",
+                    "Public transport",
+                    "Taxi",
+                    "Entertainment"
+                ],
+                "Cost (€)": [
+                    airfare["total"],
+                    daily["food"],
+                    daily["drinks"],
+                    daily["transport"],
+                    daily["taxi"],
+                    daily["entertainment"]
+                ]
+            })
+
+            st.bar_chart(
+                chart_data,
+                x="Category",
+                y="Cost (€)",
+                color="#147D80"
+            )
+
+            st.info(
+                "Accommodation will be added to the "
+                "total budget once its model is connected."
+            )
+
+            # ==========================================
+            # 12. ESTIMATION LIMITATIONS
+            # ==========================================
+
+            with st.expander("How are expenses estimated?"):
+
+                st.write(
+                    "Airfare is predicted using a trained "
+                    "Recurrent Neural Network and historical "
+                    "monthly airfare sequences."
+                )
+
+                st.write(
+                    "Other expenses are calculated using "
+                    "destination-specific item prices, "
+                    "trip duration, number of travelers "
+                    "and predefined spending profiles."
+                )
+
+                st.write(
+                    "Some missing local prices are estimated "
+                    "using country-level median prices."
+                )
+
+                st.write(
+                    f"Assumed currency conversion: "
+                    f"1 USD = {daily['exchange_rate']} EUR."
+                )
+
+                st.write(
+                    "Daily expense estimates do not currently "
+                    "account for future inflation. "
+                    "Entertainment is estimated using cinema "
+                    "prices as a proxy."
+                )
+
+                st.write(
+                    "All results are estimates, not guaranteed "
+                    "booking prices. Forecast uncertainty "
+                    "may increase for longer travel horizons."
+                )
+
+        except Exception as error:
+
+            st.error(
+                f"Unable to generate prediction: {error}"
+            )
+
+# ==========================================
+# 13. FOOTER
+# ==========================================
 
 st.divider()
 
