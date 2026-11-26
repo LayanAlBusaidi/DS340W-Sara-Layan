@@ -328,7 +328,7 @@ DAILY_COST_PATH = (
 
 # Temporary fixed currency conversion rate
 # USD to EUR
-USD_TO_EUR = 0.86
+USD_TO_EUR = 1
 
 
 # Daily spending profiles
