@@ -24,3 +24,6 @@ parent_paper/old_preprocessed_data/
 # Ignore raw Airbnb datasets
 data/accommodation/raw/
 data/accomodation/raw/
+
+# Large processed accommodation datasets
+data/accommodation/clean/*.csv
