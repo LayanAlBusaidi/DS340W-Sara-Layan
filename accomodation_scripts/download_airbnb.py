@@ -6,8 +6,12 @@ import gzip
 import shutil
 import re
 
-# SETTINGS
+# Required packages:
+# Before running this script, install the dependencies
+# by running the following command in the terminal:
+# python -m pip install requests beautifulsoup4
 
+# SETTINGS
 URL = "https://insideairbnb.com/get-the-data/"
 
 ROOT = Path(__file__).resolve().parent.parent
